@@ -23,7 +23,7 @@ portfolio/
 | Section | Status |
 |---|---|
 | Name, tagline, summary | ✅ Shash Singh |
-| About bio | ✅ 3 paragraphs |
+| About bio | ✅ 1 paragraph |
 | MLB Picks | ✅ description + stack + GitHub + live demo |
 | Restaurant Chat Widget | ✅ description + stack + GitHub + live demo |
 | Crypto Desk | ✅ description + stack + GitHub + live demo |

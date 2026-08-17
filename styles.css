@@ -68,6 +68,16 @@ h2 {
 
 h3 { font-size: 1.125rem; font-weight: 650; }
 
+/* Sub-heading inside a section (e.g. Certifications under Skills) */
+.subhead {
+  font-size: .8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-soft);
+  margin: 1.75rem 0 .75rem;
+}
+
 p { margin: 0 0 1rem; }
 p:last-child { margin-bottom: 0; }
 

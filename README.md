@@ -3,7 +3,7 @@
 A one-page static portfolio site. Plain HTML, CSS, and a tiny bit of vanilla JS —
 no framework, no build step, no dependencies. Edit the files directly and reload.
 
-**Live:** https://portfolio-nine-woad-54.vercel.app
+**Live:** https://shail.us
 **Repo:** https://github.com/shash825/portfolio
 
 ```
@@ -30,7 +30,7 @@ portfolio/
 | Skills | ✅ 10 tags |
 | Resume PDF | ✅ real resume in place |
 | Email / GitHub / LinkedIn | ✅ ss44@usf.edu, shash825, in/shash28 |
-| Custom domain | ⚠️ **not set up yet — the last step** |
+| Custom domain | ✅ shail.us (Cloudflare DNS → Vercel) |
 
 ### Editing content
 
@@ -108,29 +108,41 @@ vercel project ls
 
 ---
 
-## Adding your custom domain (last step)
+## Custom domain: shail.us
 
-Once you have the domain, this is the sequence:
+Already set up. Recorded here in case it ever needs rebuilding.
 
-1. **Vercel dashboard → your `portfolio` project → Settings → Domains → Add.**
-   Enter the domain (e.g. `example.com`).
-2. **Vercel then shows you the exact DNS records to add** — an `A` record for the apex
-   domain, or a `CNAME` for a subdomain like `www`. Use the values Vercel displays rather
-   than any you find in a blog post; the target IPs have changed over the years and the
-   dashboard is the source of truth for your project.
-3. **Add those records at your registrar**, deleting any conflicting existing records first
-   — a parked-page A record or a registrar "forwarding" record on the same host will break it.
-4. **Wait for propagation** (usually 10–60 minutes, occasionally up to 24 hours). Check with:
+**Cloudflare DNS** (Cloudflare is both registrar and DNS host):
 
-   ```bash
-   dig example.com +noall +answer
-   ```
+| Type | Name | Target | Proxy |
+|---|---|---|---|
+| CNAME | `@` | `30a6d81e59383d24.vercel-dns-017.com` | **DNS only** |
+| CNAME | `www` | `30a6d81e59383d24.vercel-dns-017.com` | **DNS only** |
 
-5. **HTTPS is automatic.** Vercel issues a Let's Encrypt certificate as soon as DNS
-   resolves — no button to click. Confirm `https://example.com` loads with a valid padlock.
+That CNAME target is specific to this Vercel project. Don't substitute the generic
+`cname.vercel-dns.com` or the `76.76.21.21` IP found in older docs.
 
-**Apex vs. www:** add both (`example.com` and `www.example.com`) and set one as primary in
-Vercel. It redirects the other automatically, so neither version 404s.
+**The proxy setting matters.** Both records must be *DNS only* (grey cloud). Proxied
+through Cloudflare, requests loop between Cloudflare's edge and Vercel's and the site
+fails to load. Cloudflare shows a banner urging you to enable proxying — ignore it.
+
+**Gotcha hit during setup:** a leftover Worker (`shail-testing`) had `shail.us` bound as a
+Custom Domain, which blocks any DNS record on that name. Workers-managed records can't be
+removed from the DNS tab — they come off at Workers & Pages → the Worker → Domains → Remove.
+
+**Certificate:** Let's Encrypt, issued via `vercel certs issue shail.us www.shail.us` after
+it didn't auto-provision. Renews automatically. Verify with:
+
+```bash
+curl -sI https://shail.us | head -1
+```
+
+**Mail is unaffected** — the MX, SPF, DKIM, and DMARC records on `shail.us` sit alongside
+the site records and were left untouched.
+
+**Optional, not done:** `www.shail.us` currently serves the site directly rather than
+redirecting to the apex. To change it: Vercel → project → Settings → Domains → `www` →
+Edit → redirect to `shail.us`.
 
 ---
 

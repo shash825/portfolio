@@ -1,16 +1,15 @@
 /* ============================================================
    Personal portfolio — minimal static stylesheet
-   Palette: near-black text on off-white, one indigo accent.
+   Palette: near-black text on a soft indigo page, white cards, one indigo accent.
    All text/background pairs below meet WCAG AA (4.5:1+).
    ============================================================ */
 
 :root {
-  --bg:        #fbfbf9;
-  --band:      #f2f3fb;   /* tinted section background — a wash of --accent */
-  --surface:   #ffffff;
-  --text:      #16181d;   /* 16.5:1 on --bg */
-  --text-soft: #565c66;   /* 6.4:1  on --bg */
-  --border:    #e3e3de;
+  --bg:        #f2f3fb;   /* soft indigo page background */
+  --surface:   #ffffff;   /* cards, chips, sticky header */
+  --text:      #16181d;   /* 16.1:1 on --bg */
+  --text-soft: #565c66;   /* 6.1:1  on --bg */
+  --border:    #dfe1ee;   /* cool hairline, tuned to --bg */
   --accent:    #2f45c5;   /* 7.9:1  on --bg */
   --accent-dk: #1f2f96;
 
@@ -51,15 +50,6 @@ img { max-width: 100%; height: auto; }
 
 .section { padding-block: 3.5rem; }
 .section + .section { border-top: 1px solid var(--border); }
-
-/* Tinted full-bleed band. The colour change separates the sections, so the
-   hairline border is redundant wherever a band meets a plain section. */
-.band { background: var(--band); }
-.band + .section,
-.section + .band { border-top: none; }
-
-/* Chips sit on the tint, so give them the white surface for contrast. */
-.band .tag { background: var(--surface); }
 
 /* ---------- typography ---------- */
 
@@ -122,7 +112,7 @@ a:hover { color: var(--accent-dk); }
 
 .site-header {
   position: sticky; top: 0; z-index: 10;
-  background: rgba(251, 251, 249, .88);
+  background: rgba(242, 243, 251, .88);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
 }
@@ -242,7 +232,7 @@ a:hover { color: var(--accent-dk); }
   transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 .card:hover {
-  border-color: #cfcfc8;
+  border-color: #c9cde4;
   box-shadow: var(--shadow);
   transform: translateY(-2px);
 }
@@ -266,7 +256,7 @@ a:hover { color: var(--accent-dk); }
 .tag {
   font-size: .8125rem;
   color: var(--text-soft);
-  background: #f2f2ee;
+  background: #e8eaf6;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: .2rem .55rem;

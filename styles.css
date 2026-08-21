@@ -194,19 +194,18 @@ a:hover { color: var(--accent-dk); }
 
 .photo-strip {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: .75rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .6rem;
   list-style: none;
   margin: 1.75rem 0 0;
   padding: 0;
-  max-width: 30rem;
 }
 
 .photo-strip img {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: var(--radius);
   border: 1px solid var(--border);

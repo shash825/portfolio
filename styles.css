@@ -6,6 +6,7 @@
 
 :root {
   --bg:        #fbfbf9;
+  --band:      #f2f3fb;   /* tinted section background — a wash of --accent */
   --surface:   #ffffff;
   --text:      #16181d;   /* 16.5:1 on --bg */
   --text-soft: #565c66;   /* 6.4:1  on --bg */
@@ -50,6 +51,15 @@ img { max-width: 100%; height: auto; }
 
 .section { padding-block: 3.5rem; }
 .section + .section { border-top: 1px solid var(--border); }
+
+/* Tinted full-bleed band. The colour change separates the sections, so the
+   hairline border is redundant wherever a band meets a plain section. */
+.band { background: var(--band); }
+.band + .section,
+.section + .band { border-top: none; }
+
+/* Chips sit on the tint, so give them the white surface for contrast. */
+.band .tag { background: var(--surface); }
 
 /* ---------- typography ---------- */
 

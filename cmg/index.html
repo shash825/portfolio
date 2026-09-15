@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A DCF and comparable companies valuation of Chipotle Mexican Grill, built in Python.">
+<title>Valuing Chipotle | Shash Singh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#FDFDFB;
+  --ink:#1F1F1D;
+  --ink-2:#4A4945;
+  --ink-3:#77756F;
+  --rule:#E3E1DC;
+  --rule-2:#CDCAC3;
+  --code-bg:#F3F2EE;
+  --accent:#9A3B2E;
+  --on-accent:#FFFFFF;
+  --track:#EEEDE9;
+  --bar:#8F8B83;
+
+  --ramp-1:#F0EFEC; --ramp-2:#E2E0DB; --ramp-3:#CFCCC5; --ramp-4:#B6B2AA;
+  --ramp-5:#98948B; --ramp-6:#77736B; --ramp-7:#56534D;
+  --on-1:#1F1F1D; --on-2:#1F1F1D; --on-3:#1F1F1D; --on-4:#1F1F1D;
+  --on-5:#1F1F1D; --on-6:#FFFFFF; --on-7:#FFFFFF;
+
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#161615; --ink:#E6E4DF; --ink-2:#BDBBB5; --ink-3:#8D8B85;
+    --rule:#2C2B29; --rule-2:#3D3C39; --code-bg:#1F1E1C;
+    --accent:#D07A6B; --on-accent:#1A0E0B; --track:#242321; --bar:#8A877F;
+    --ramp-1:#232321; --ramp-2:#2D2D2A; --ramp-3:#3A3935; --ramp-4:#4B4A45;
+    --ramp-5:#605E58; --ramp-6:#7A7770; --ramp-7:#9C9990;
+    --on-1:#E6E4DF; --on-2:#E6E4DF; --on-3:#E6E4DF; --on-4:#E6E4DF;
+    --on-5:#E6E4DF; --on-6:#151514; --on-7:#151514;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#161615; --ink:#E6E4DF; --ink-2:#BDBBB5; --ink-3:#8D8B85;
+  --rule:#2C2B29; --rule-2:#3D3C39; --code-bg:#1F1E1C;
+  --accent:#D07A6B; --on-accent:#1A0E0B; --track:#242321; --bar:#8A877F;
+  --ramp-1:#232321; --ramp-2:#2D2D2A; --ramp-3:#3A3935; --ramp-4:#4B4A45;
+  --ramp-5:#605E58; --ramp-6:#7A7770; --ramp-7:#9C9990;
+  --on-1:#E6E4DF; --on-2:#E6E4DF; --on-3:#E6E4DF; --on-4:#E6E4DF;
+  --on-5:#E6E4DF; --on-6:#151514; --on-7:#151514;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+img{max-width:100%}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:18px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+main{width:min(660px,100% - 2.5rem);margin:0 auto;padding:4.5rem 0 4rem}
+
+.home{display:inline-block;font-size:.9rem;color:var(--ink-3);text-decoration:none;margin-bottom:2.2rem}
+.home:hover{color:var(--ink)}
+h1{font-size:2.3rem;line-height:1.15;font-weight:600;letter-spacing:-.01em;margin:0 0 .5rem;text-wrap:balance}
+.sub{font-size:1.15rem;color:var(--ink-2);margin:0 0 2.8rem;padding-bottom:1.4rem;border-bottom:1px solid var(--rule)}
+.meta{font-size:.9rem;color:var(--ink-3);margin:0 0 2.8rem;padding-bottom:1.4rem;border-bottom:1px solid var(--rule)}
+
+h2{font-size:1.45rem;line-height:1.25;font-weight:600;margin:3.2rem 0 .9rem;text-wrap:balance}
+h3{font-size:1.08rem;font-weight:600;margin:2rem 0 .5rem}
+p{margin:0 0 1.1rem}
+a{color:var(--ink);text-decoration-color:var(--rule-2);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--ink)}
+a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.note{font-size:.88rem;color:var(--ink-3);margin-top:-.4rem}
+
+/* tables */
+.tw{overflow-x:auto;margin:1.4rem 0 1.5rem}
+table{border-collapse:collapse;width:100%;font-size:.95rem;font-variant-numeric:tabular-nums}
+th,td{padding:.45rem .6rem;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+th:last-child,td:last-child{padding-right:0}
+thead th{font-weight:600;font-size:.85rem;color:var(--ink-2);border-bottom:1px solid var(--rule-2)}
+tr.total td{font-weight:600;border-top:1px solid var(--rule-2)}
+td.muted{color:var(--ink-3)}
+
+ul{margin:0 0 1.2rem;padding-left:1.2rem}
+li{margin-bottom:.6rem}
+
+/* code */
+pre{
+  margin:1.2rem 0 1.4rem;padding:.9rem 1rem;overflow-x:auto;
+  background:var(--code-bg);border-radius:2px;
+  font-family:var(--mono);font-size:.76rem;line-height:1.6;color:var(--ink);
+}
+pre .c{color:var(--ink-3)}
+.file{font-family:var(--mono);font-size:.78rem;color:var(--ink-3);margin:1.4rem 0 -.8rem}
+
+/* charts */
+figure{margin:1.6rem 0 1.4rem}
+figcaption{font-size:.88rem;color:var(--ink-3);margin-top:.7rem}
+.bars{display:flex;flex-direction:column;gap:.55rem;font-family:var(--serif)}
+.brow{display:grid;grid-template-columns:48px 1fr 58px;align-items:center;gap:.75rem}
+.bname{font-size:.9rem;color:var(--ink-2)}
+.btrack{position:relative;height:26px;background:var(--track)}
+.bfill{position:absolute;left:0;top:0;bottom:0;background:var(--bar)}
+.brow:hover .bfill,.brow:focus-visible .bfill{background:var(--ink-2)}
+.bval{font-size:.92rem;text-align:right;font-variant-numeric:tabular-nums}
+.mline{position:absolute;top:-5px;bottom:-5px;border-left:2px solid var(--accent)}
+.bscale{display:grid;grid-template-columns:48px 1fr 58px;gap:.75rem;margin-top:.35rem;font-size:.78rem;color:var(--ink-3)}
+.ticks{position:relative;height:1.1rem}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+.key{font-size:.85rem;color:var(--ink-3);margin-top:.5rem}
+.key i{display:inline-block;width:14px;border-top:2px solid var(--accent);vertical-align:middle;margin-right:.35rem}
+
+.heat{display:grid;gap:2px;font-size:.84rem;font-variant-numeric:tabular-nums;min-width:460px}
+.heat div{padding:.4rem .2rem;text-align:center}
+.heat .hd{color:var(--ink-3);font-size:.8rem}
+.heat .rh{text-align:right;padding-right:.55rem;color:var(--ink-3);font-size:.8rem}
+.heat .cell{cursor:default;outline:1px solid transparent;outline-offset:-1px}
+.heat .cell:hover,.heat .cell:focus-visible{outline-color:var(--ink)}
+.heat .s0{background:var(--ramp-1);color:var(--on-1)}
+.heat .s1{background:var(--ramp-2);color:var(--on-2)}
+.heat .s2{background:var(--ramp-3);color:var(--on-3)}
+.heat .s3{background:var(--ramp-4);color:var(--on-4)}
+.heat .s4{background:var(--ramp-5);color:var(--on-5)}
+.heat .s5{background:var(--ramp-6);color:var(--on-6)}
+.heat .s6{background:var(--ramp-7);color:var(--on-7)}
+.heat .clears{background:var(--accent);color:var(--on-accent);font-weight:600}
+.heat .base{outline:2px solid var(--ink);outline-offset:-2px}
+
+#tip{
+  position:fixed;z-index:10;pointer-events:none;opacity:0;transform:translate(-50%,-120%);
+  background:var(--ink);color:var(--ground);padding:.35rem .55rem;border-radius:2px;
+  font-size:.8rem;line-height:1.35;max-width:240px;transition:opacity .1s;
+}
+#tip.on{opacity:1}
+
+footer{margin-top:3.5rem;padding-top:1.3rem;border-top:1px solid var(--rule);font-size:.88rem;color:var(--ink-3)}
+footer p{margin-bottom:.6rem}
+
+@media (max-width:600px){
+  body{font-size:17px}
+  main{padding-top:3rem}
+  h1{font-size:1.9rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<main>
+  <a class="home" href="/">Shash Singh</a>
+  <h1>Valuing Chipotle</h1>
+  <p class="sub">A DCF and comparable companies analysis of Chipotle Mexican Grill (NYSE: CMG)</p>
+
+  <p>Chipotle was trading at $36.95 when I pulled the data. My base-case discounted cash flow model values it at $21.20 a share, and even my bull case only gets to $27.59. The comparable companies analysis gives a wide range that includes the market price.</p>
+  <p>So instead of focusing on one target price, I tried to answer a more useful question: what would you need to believe to pay $36.95?</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Summary</th><th>Per share</th></tr></thead>
+      <tbody>
+        <tr><td>Market price</td><td>$36.95</td></tr>
+        <tr><td>DCF, base case</td><td>$21.20</td></tr>
+        <tr><td>DCF, bear to bull</td><td>$12.76 to $27.59</td></tr>
+        <tr><td>Comparable companies range</td><td>$10.45 to $80.14</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Approach</h2>
+  <p>I valued the company two ways. The DCF projects five years of free cash flow, adds a terminal value, and discounts everything back at Chipotle's cost of capital. Every input is my own assumption, so the result depends on how reasonable those assumptions are.</p>
+  <p>The comparable companies analysis applies the trading multiples of six restaurant companies to Chipotle's financials. It relies on how the market currently prices the sector instead of on my forecasts. Using both gives a way to check one method against the other.</p>
+
+  <h2>The DCF</h2>
+  <p>Revenue grows 9.2% in 2026, in line with analyst consensus, then slows to 7.0% by 2030. Operating margin starts at 16.5% and rises to 17.5%, which stays inside Chipotle's range over the last four years. Capital spending is about 5% of revenue, mostly for new restaurants. The discount rate is 9.49%, and cash flows after 2030 grow at 3% a year.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>From enterprise value to share price</th><th>Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Present value of 2026 to 2030 cash flows</td><td>$6.12B</td></tr>
+        <tr><td>Present value of terminal value</td><td>$20.03B</td></tr>
+        <tr><td>Enterprise value</td><td>$26.14B</td></tr>
+        <tr><td>Plus net cash</td><td>$0.68B</td></tr>
+        <tr><td>Equity value</td><td>$26.82B</td></tr>
+        <tr><td>Shares outstanding</td><td>1.265B</td></tr>
+        <tr class="total"><td>Value per share</td><td>$21.20</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>How I handled leases</h3>
+  <p>Chipotle has no bonds or bank loans. The $5.42 billion of debt on its balance sheet is lease liabilities, because it rents almost all of its restaurants.</p>
+  <p>Rent is already subtracted before operating income, so the cost of those leases is already in the cash flows. If I also subtracted the lease liability as debt, I would be counting the same cost twice, which would take $4.28 off the value per share. I left leases out of net debt and treated the company as financed entirely by equity. That decision lives in one function:</p>
+
+  <p class="file">src/dcf/equity_bridge.py</p>
+<pre>def net_debt(total_debt, cash, treat_leases_as_debt, lease_share_of_total_debt):
+    <span class="c"># For CMG, all reported debt is leases (lease_share_of_total_debt = 1.0).</span>
+    if treat_leases_as_debt:
+        debt_in_bridge = total_debt
+    else:
+        debt_in_bridge = total_debt * (1.0 - lease_share_of_total_debt)
+    return debt_in_bridge - cash</pre>
+
+  <p>With no debt in the capital structure, the discount rate is just the cost of equity from CAPM: a 4.8% risk-free rate plus a beta of 0.94 times a 5.0% equity risk premium, which comes to 9.49%.</p>
+
+  <h3>Checking the terminal value</h3>
+  <p>The terminal value is about 77% of the enterprise value, so I wanted to confirm it made sense. In the last forecast year, capital spending is 1.67 times depreciation. That looked high for a company growing 3% a year, so I checked what it implies.</p>
+  <p>After subtracting depreciation, net reinvestment is $384 million, or 16.2% of after-tax operating profit. Funding 3% growth with that much reinvestment implies an 18.5% return on new capital. That is reasonable for Chipotle, so I kept the assumption.</p>
+
+  <h2>Scenarios</h2>
+  <p>I also ran bear and bull cases. They change revenue growth, margins, and terminal growth but keep the same 9.49% discount rate.</p>
+
+  <figure>
+    <div class="bars" id="bars"></div>
+    <div class="bscale"><span></span><div class="ticks" id="ticks"></div><span></span></div>
+    <p class="key"><i></i>Market price, $36.95</p>
+    <figcaption>Value per share in each scenario.</figcaption>
+  </figure>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Scenario</th><th>2030 revenue</th><th>2030 margin</th><th>Terminal growth</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Bear</td><td>$14.3B</td><td>14.5%</td><td>2.0%</td><td>$12.76</td></tr>
+        <tr><td>Base</td><td>$18.0B</td><td>17.5%</td><td>3.0%</td><td>$21.20</td></tr>
+        <tr><td>Bull</td><td>$20.5B</td><td>19.0%</td><td>3.5%</td><td>$27.59</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Two results stood out. First, even the bull case is below the market price, and its 19.0% margin is already higher than anything Chipotle has reported. That suggests the market price has more to do with a lower discount rate than with better operating results.</p>
+  <p>Second, the bear case still earns a 10.6% return on new capital, which is above the 9.49% cost of capital. A tougher bear case would need returns to fall below the cost of capital.</p>
+
+  <h2>Sensitivity</h2>
+  <p>This table shows the value per share for different discount rates and terminal growth rates. The outlined cell is the base case.</p>
+
+  <figure>
+    <div style="overflow-x:auto"><div class="heat" id="heat"></div></div>
+    <figcaption>Rows are the discount rate (WACC). Columns are terminal growth. Darker cells are higher values. The colored cell is the only one above the market price.</figcaption>
+  </figure>
+
+  <p>Only one combination gets above $36.95: a 7.5% discount rate with 4.0% terminal growth. That needs a cost of equity about two points lower than CAPM gives and long-run growth faster than the economy, both at once.</p>
+
+  <h2>Comparable companies</h2>
+  <p>I picked six restaurant companies with business models similar to Chipotle's.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Company</th><th>EV/Revenue</th><th>EV/EBITDA</th><th>P/E</th><th>Revenue growth</th></tr></thead>
+      <tbody>
+        <tr><td>Sweetgreen</td><td>1.51x</td><td class="muted">n/m</td><td class="muted">n/m</td><td>3.8%</td></tr>
+        <tr><td>Shake Shack</td><td>2.24x</td><td>20.2x</td><td>71.0x</td><td>17.2%</td></tr>
+        <tr><td>Wingstop</td><td>5.72x</td><td>17.6x</td><td>25.8x</td><td>6.4%</td></tr>
+        <tr><td>Domino's</td><td>3.23x</td><td>15.9x</td><td>19.0x</td><td>4.3%</td></tr>
+        <tr><td>Yum! Brands</td><td>6.18x</td><td>17.6x</td><td>18.8x</td><td>12.2%</td></tr>
+        <tr><td>CAVA</td><td>5.23x</td><td>44.7x</td><td>107.4x</td><td>31.3%</td></tr>
+        <tr class="total"><td>Chipotle</td><td>4.15x</td><td>22.6x</td><td>34.2x</td><td>9.3%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">n/m means not meaningful. Sweetgreen has negative earnings and EBITDA.</p>
+
+  <p>Applying the peer multiples to Chipotle's numbers gives a range of $10.45 to $80.14, with the median multiples pointing to about $33. Chipotle's EV/EBITDA of 22.6x is higher than every peer except CAVA, which lines up with what the DCF shows.</p>
+  <p>I left Sweetgreen out of the P/E comparison because it loses money. The data source still reported a P/E of 77x for it, so I filtered on actual net income and earnings per share instead of trusting the ratio. Including it would have raised the peer median P/E from 25.8x to 48.4x. Without it, the median P/E implies $29.43 a share, close to the $29.28 from EV/EBITDA.</p>
+
+  <h2>Limitations</h2>
+  <ul>
+    <li>Six peers is a small group, so the comps range is a rough guide.</li>
+    <li>The margin assumptions are the most uncertain part. Revenue is tied to analyst estimates for two years, but margins are based on history and my judgment.</li>
+    <li>The bull case margin of 19.0% is higher than Chipotle has ever reached.</li>
+    <li>Beta and EBITDA come from the data provider, not directly from filings, and can vary between sources.</li>
+  </ul>
+
+  <h2>How I built it</h2>
+  <p>The model is written in Python using pandas and yfinance. All the assumptions are in one configuration file, so changing an input doesn't require touching the calculation code. For example:</p>
+
+  <p class="file">config/assumptions.yaml</p>
+<pre>revenue_growth:     [0.092, 0.100, 0.090, 0.080, 0.070]   <span class="c"># FY2026-FY2030</span>
+operating_margin:   [0.165, 0.168, 0.171, 0.173, 0.175]
+tax_rate: 0.25
+terminal_growth_rate: 0.030</pre>
+
+  <p>Financial data is saved by the date it was pulled, so rerunning the model later produces the same numbers shown here. The project has 33 tests covering the calculations, and they run automatically on GitHub whenever the code changes. The tables and charts on this page come from the model's output.</p>
+
+  <footer>
+    <p>Code and full methodology: <a href="https://github.com/shash825/cmg-valuation-model">github.com/shash825/cmg-valuation-model</a></p>
+  </footer>
+</main>
+
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var MARKET = 36.95, MAX = 40;
+  function pct(v){ return v / MAX * 100; }
+
+  var tip = document.getElementById("tip");
+  function place(x, y){
+    tip.style.left = Math.max(80, Math.min(window.innerWidth - 80, x)) + "px";
+    tip.style.top = y + "px";
+  }
+  function bind(el){
+    el.addEventListener("mouseenter", function(e){ tip.textContent = el.getAttribute("data-tip"); tip.classList.add("on"); place(e.clientX, e.clientY); });
+    el.addEventListener("mousemove", function(e){ place(e.clientX, e.clientY); });
+    el.addEventListener("mouseleave", function(){ tip.classList.remove("on"); });
+    el.addEventListener("focus", function(){ var r = el.getBoundingClientRect(); tip.textContent = el.getAttribute("data-tip"); tip.classList.add("on"); place(r.left + r.width / 2, r.top); });
+    el.addEventListener("blur", function(){ tip.classList.remove("on"); });
+  }
+
+  var scenarios = [
+    ["Bear", 12.76, "14.5% margin, 2.0% terminal growth"],
+    ["Base", 21.20, "17.5% margin, 3.0% terminal growth"],
+    ["Bull", 27.59, "19.0% margin, 3.5% terminal growth"]
+  ];
+  var bars = document.getElementById("bars");
+  scenarios.forEach(function(s){
+    var row = document.createElement("div");
+    row.className = "brow";
+    row.tabIndex = 0;
+    row.setAttribute("data-tip", s[0] + ": $" + s[1].toFixed(2) + ". " + s[2] + ".");
+    row.innerHTML =
+      '<span class="bname">' + s[0] + '</span>' +
+      '<span class="btrack"><span class="bfill" style="width:' + pct(s[1]).toFixed(2) + '%"></span>' +
+      '<span class="mline" style="left:' + pct(MARKET).toFixed(2) + '%"></span></span>' +
+      '<span class="bval">$' + s[1].toFixed(2) + '</span>';
+    bars.appendChild(row);
+    bind(row);
+  });
+  var ticks = document.getElementById("ticks");
+  [0, 10, 20, 30, 40].forEach(function(t){
+    var el = document.createElement("span");
+    el.style.left = pct(t) + "%";
+    el.textContent = "$" + t;
+    ticks.appendChild(el);
+  });
+
+  var waccs = ["7.5%","8.0%","8.5%","9.0%","9.5%","10.0%","10.5%"];
+  var growth = ["2.0%","2.5%","3.0%","3.5%","4.0%"];
+  var grid = [
+    [25.90,28.03,30.64,33.90,38.10],
+    [23.71,25.46,27.55,30.11,33.32],
+    [21.86,23.32,25.03,27.09,29.60],
+    [20.28,21.50,22.93,24.61,26.63],
+    [18.91,19.95,21.15,22.55,24.20],
+    [17.71,18.60,19.62,20.80,22.17],
+    [16.65,17.43,18.30,19.31,20.46]
+  ];
+  var lo = 16.65, hi = 38.10;
+  var heat = document.getElementById("heat");
+  heat.style.gridTemplateColumns = "64px repeat(5,1fr)";
+  function add(cls, text){ var d = document.createElement("div"); d.className = cls; d.textContent = text; heat.appendChild(d); return d; }
+  add("hd rh", "");
+  growth.forEach(function(g){ add("hd", g); });
+  grid.forEach(function(row, ri){
+    add("rh", waccs[ri]);
+    row.forEach(function(v, ci){
+      var step = Math.round((v - lo) / (hi - lo) * 6);
+      var clears = v >= MARKET;
+      var d = add("cell " + (clears ? "clears" : "s" + step) + (ri === 4 && ci === 2 ? " base" : ""), "$" + v.toFixed(2));
+      d.tabIndex = 0;
+      d.setAttribute("data-tip", "WACC " + waccs[ri] + ", terminal growth " + growth[ci] + ": $" + v.toFixed(2));
+      bind(d);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
